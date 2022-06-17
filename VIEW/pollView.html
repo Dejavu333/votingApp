@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="hu">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="http://www.localhost:3000/style.css">
+
+    <title>dynamic HTML</title>
+</head>
+
+<body>
+    <div class="container">
+        <!-- JS generated dynamic HTML -->
+    </div>
+    <script>
+    //variables,constants//
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const id = urlParams.get("id");
+    const address = "http://www.localhost:3000/getPollInc";
+    const data = {
+        id_pk: id
+    }
+    const options = {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+    }
+    //define functions//
+    /*ajax refresh content*/
+    setInterval((function () {
+        fetch(address, options)
+            .then(function (response) {
+                return response.json();         //GET JSON as object in a promise
+            })
+            .then(function (data) {
+                const container = document.body.querySelector(".container");
+                container.innerHTML = generateHTML(data.poll, data.options);
+
+                const options = document.querySelectorAll(".optionDiv");
+                for (i = 0; i < options.length; i++) {
+                    options[i].addEventListener("click", function () {
+
+                        console.log(this.children[0].innerText);
+
+                        if (getCookie("vote") == null) {
+                            vote(this);
+                            setCookie("vote", "already")
+                        }
+                    });
+                }
+            });
+    })(), 5000);
+
+    function vote(p_obj) {
+        p_obj.children[2].innerText = Number(p_obj.children[2].innerText) + 1
+
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        const id = urlParams.get("id");
+
+        const data = {
+            id_pk: id,
+            title: p_obj.children[0].innerText
+        }
+        const options = {
+            method: "POST",
+            headers: { "Content-type": "application/json" },
+            body: JSON.stringify(data)
+        }
+        fetch("/addVoteInc", options);
+    }
+
+    function copyToClipBoard() {
+        navigator.clipboard.writeText(window.location.href);
+    }
+
+    function generateHTML(p_poll, p_options) {
+        //decide theme
+        const root = document.querySelector(":root");
+        p_poll.UUId == 0? root.style.setProperty('--theme','#fa8072'):root.style.setProperty('--theme','#f9c23c');
+        //define html
+        let firstPart_ss =
+            ` <main>
+                <h2>${p_poll.title}</h2><br>
+                <div class="uniform" id="linkIco" onclick="copyToClipBoard()" title="Meghívó Link Másolása">🔗</div>
+                <br>`;
+
+        let secondPart_ss = "";
+        for (i = 0; i < p_options.length; i = i + 1) {
+            secondPart_ss = secondPart_ss +
+                `<div class="optionDiv uniform">
+                        <span class="title">${p_options[i].title}</span>
+                        <br>
+                        <span class="numOfVotes">${p_options[i].numOfVotes}</span>
+                    </div>`;
+        }
+
+        secondPart_ss = secondPart_ss +
+            `<p>Kattints a szavazáshoz!</p>
+                <a href="http://www.localhost:3000/">
+                    <div class="uniform">Átlépés Másik Szobába!</div>
+                </a>
+            </main>`;
+
+        const HTML = firstPart_ss + secondPart_ss;
+        return HTML;
+    }
+    
+    function setCookie(p_name, p_value) {
+        var path = window.location.pathname;
+        document.cookie = `${p_name}=${p_value}; path=${path}`;
+    }
+    
+    function getCookie(cookie_name) {
+            // Construct a RegExp object as to include the variable name
+            const re = new RegExp(`(?<=${cookie_name}=)[^;]*`);
+            try {
+                return document.cookie.match(re)[0];	// Will raise TypeError if cookie is not found
+            }
+            catch {
+                return null;
+            }
+        }   
+    </script>
+</body>
+
+</html>

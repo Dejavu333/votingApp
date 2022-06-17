@@ -1,0 +1,14 @@
+create TABLE POLLS ( 
+    id_pk integer AUTO_INCREMENT,
+	PRIMARY KEY (id_pk),
+    title varchar(60),
+    UUId integer
+);
+
+
+create TABLE OPTIONS (   
+    id_fk integer,
+    FOREIGN KEY (id_fk) REFERENCES POLLS(id_pk),
+    title varchar(40),
+    numOfVotes integer
+);

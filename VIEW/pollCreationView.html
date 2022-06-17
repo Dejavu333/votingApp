@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="hu">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="http://www.localhost:3000/style.css">
+
+    <title>Új Szavazás</title>
+</head>
+
+<body>
+    <main>
+        <form action="/addPollInc" method="POST" class="container" id="optionsForm">
+            <h2>A Szavazás Részletei:</h2>
+
+            <br />
+            <section id="optionsSection">
+                <div id="lockIco" class="uniform" onclick="changeLockIco();setUUId()" title="Zárt🔒/Publikus🔓">🔓</div>
+                <br />
+                <input type="text" class="uniform" placeholder="cím" name="title" required></input>
+                <br />
+
+                <input type="text" class="uniform" placeholder="opció" name="option1" required></input>
+                <br />
+                <input type="text" class="uniform" placeholder="opció" name="option2" required></input>
+                <br />
+            </section>
+
+            <br />
+            <input type="button" class="uniform" id="plusBtn" value="+" onclick="createOption()"></input>
+            <input type="button" class="uniform" id="minusBtn" value="-" onclick="deleteEmpties()"></input>
+            <br />
+            <br />
+            <input type="hidden" name="UUId" id="UUId" value="0"></input>
+            <input type="submit" class="uniform" value="Létrehozás"></input>
+            <form>
+    </main>
+    <script src="./common.js"></script>
+    <script>
+    //define functions//
+        /*change the icon from 'open' to 'locked' and vice versa*/
+        let isPublic = true;
+        function changeLockIco() {
+            const lockIco = document.body.querySelector("#lockIco");
+            const root = document.querySelector(":root");
+        
+            if(isPublic == true) {
+                isPublic=false;
+                lockIco.innerText = "🔒";
+                root.style.setProperty('--theme','#f9c23c');
+            }
+            else if(isPublic == false) {
+                isPublic=true;
+                lockIco.innerText = "🔓";
+                root.style.setProperty('--theme','#fa8072');
+            }
+        }  
+        /*create option inputs if 2 inputs are not enough*/
+        let counter = 2;
+        function createOption() {
+            counter = counter + 1;
+            let newElement = document.createElement("input");
+            let optionsSection = document.getElementById("optionsSection");
+
+            setMoreAttributes(newElement,
+                "type", "text",
+                "class", "uniform newbies",
+                "placeholder", "opció",
+                "name", `option${counter}`,
+                "required");
+
+            optionsSection.appendChild(newElement);
+        }
+        /*set multiple attributes at once*/
+        function setMoreAttributes(p_element /* attribute, value pairs go here */) {
+            for (let i = 1; i < arguments.length; i += 2) {
+                p_element.setAttribute(arguments[i], arguments[i + 1]);
+            }
+        }
+        /*delete all empty inputs*/
+        function deleteEmpties() {
+            let newbieArray = document.querySelectorAll(".newbies");
+            console.log(newbieArray);
+            console.log(newbieArray[0].value.length);
+            for (i = 0; i < newbieArray.length; i++) {
+                if (newbieArray[i].value.length == 0) {
+                    newbieArray[i].remove();
+                }
+            }
+            counter = 2;
+        }
+
+        function setUUId() {
+
+            const UUIdDiv = document.body.querySelector("#UUId");
+
+            if (isPublic == true) {
+                UUIdDiv.value = 0;
+            }
+            else if (isPublic == false) {
+                let UUId = getCookie("UUId");
+                const UUIdDiv = document.body.querySelector("#UUId");
+
+                if (UUId == null) {
+                    const UUId = generateUUId();
+                    document.cookie = `UUId=${UUId}; path=/`;
+                    UUIdDiv.value = UUId;
+                }
+                else if (UUId != null) {
+                    UUIdDiv.value = UUId;
+                }
+            }
+        }
+       
+        function generateUUId() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                let r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+    
+        function getCookie(cookie_name) {
+            // Construct a RegExp object as to include the variable name
+            const re = new RegExp(`(?<=${cookie_name}=)[^;]*`);
+            try {
+                return document.cookie.match(re)[0];	// Will raise TypeError if cookie is not found
+            }
+            catch {
+                return null;
+            }
+        }   
+    </script>
+</body>
+
+</html>

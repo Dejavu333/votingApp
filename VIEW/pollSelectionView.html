@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="hu">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="http://www.localhost:3000/style.css">
+
+    <title>Szobaválasztás</title>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Válasszon Szavazást:</h2>
+        <br />
+        <nav id="iconsNav">
+            <div class="uniform" id="searchIco" onclick="revealSearchBar()" title="Keresés">🔎</div>
+            <div class="uniform" id="lockIco" onclick="changeLockIco();showPolls(G.isPublicView)"
+                title="Zárt🔒/Publikus🔓">
+                🔓
+            </div>
+            <a href="http://www.localhost:3000/pollCreationView.html">
+                <div class="uniform" id="pinIco" title="Szavazás Létrehozása">📌</div>
+            </a>
+        </nav>
+        <main>
+            <nav id="pollsNav">
+
+            </nav>
+        </main>
+    </div>
+    <script>
+    //variables, constants//
+    const G = {
+        isPublicView: true,
+        isSearchBarUp: false,
+        searchIco: document.body.querySelector("#searchIco"),
+        lockIco: document.body.querySelector("#lockIco"),
+        pinIco: document.body.querySelector("#pinIco"),
+        pollsNav: document.querySelector("#pollsNav"),
+        iconsNav: document.querySelector("#iconsNav")
+    }
+    //invoke functions//
+    showPolls(G.isPublicView);
+    console.log(getCookie("UUId"));
+    //events//
+    document.body.addEventListener("mousedown", (e) => {
+        if (e.target == G.searchIco) {
+            const input = document.body.querySelector("#searchBar");
+            if (input != null) { G.isSearchBarUp = true }
+            else G.isSearchBarUp = false;
+        }
+    });
+    G.lockIco.addEventListener('mousedown', function (event) {
+        event.preventDefault();
+    });
+    G.pinIco.addEventListener('mousedown', function (event) {
+        event.preventDefault();
+    });
+    G.pollsNav.addEventListener('mousedown', function (event) {
+        event.preventDefault();
+    });
+    //define functions//
+    function changeLockIco() {
+            if (G.isPublicView == true) {
+                G.isPublicView = false;
+                G.lockIco.innerText = "🔒";
+            }
+            else if (G.isPublicView == false) {
+                G.isPublicView = true;
+                G.lockIco.innerText = "🔓";
+            }
+        }
+      
+    function showPolls(p_isPublicView) {
+        const UUId = getCookie("UUId");
+        const address = "http://www.localhost:3000/getPollsInc";
+        const data = {
+            UUId: UUId,
+        }
+        const options = {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        }
+
+        fetch(address, options)
+            .then(function (response) {
+                return response.json();         //GET JSON as object in a promise
+            })
+            .then(function (data) {
+
+                console.log(data);
+                G.pollsNav.innerHTML = "";
+
+                for (let iˇpoll = 0; iˇpoll < data.length; iˇpoll++) {
+                    let newElement = document.createElement("div");
+                    if (G.isPublicView == true && data[iˇpoll].UUId == "0") {
+                        newElement.innerHTML = `<a href="http://www.localhost:3000/poll${data[iˇpoll].id_pk}?id=${data[iˇpoll].id_pk}"><div class="uniform public">${data[iˇpoll].title} Szoba</div>`
+                        document.querySelector(":root").style.setProperty('--theme', '#fa8072');
+                    }
+                    else if (G.isPublicView == false && data[iˇpoll].UUId != "0") {
+                        newElement.innerHTML = `<a href="http://www.localhost:3000/poll${data[iˇpoll].id_pk}?id=${data[iˇpoll].id_pk}"><div class="uniform private">${data[iˇpoll].title} Szoba</div>`
+                        document.querySelector(":root").style.setProperty('--theme', '#f9c23c');
+                    }
+                    G.pollsNav.appendChild(newElement);
+                }
+                try {
+                    document.querySelector("#searchBar").focus();
+                }
+                catch (error) { }
+            })
+            .catch(function (reject) {
+                console.log(reject);
+            });
+    }
+    
+    function showPollsSearched(p_isPublicView, p_searchTerm) {
+        const UUId = getCookie("UUId");
+        const address = "http://www.localhost:3000/getPollsSearchedInc";
+        const data = {
+            UUId: UUId,
+            searchTerm: p_searchTerm
+        }
+        const options = {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        }
+
+        fetch(address, options)
+            .then(function (response) {
+                return response.json();         //GET JSON as object in a promise
+            })
+            .then(function (data) {
+
+                console.log(data);
+                G.pollsNav.innerHTML = "";
+
+                for (let iˇpoll = 0; iˇpoll < data.length; iˇpoll++) {
+                    let newElement = document.createElement("div");
+                    if (G.isPublicView == true && data[iˇpoll].UUId == "0") {
+                        newElement.innerHTML = `<a href="http://www.localhost:3000/poll${data[iˇpoll].id_pk}?id=${data[iˇpoll].id_pk}"><div class="uniform public">${data[iˇpoll].title} Szoba</div>`
+                        document.querySelector(":root").style.setProperty('--theme', '#fa8072');
+                    }
+                    else if (G.isPublicView == false && data[iˇpoll].UUId != "0") {
+                        newElement.innerHTML = `<a href="http://www.localhost:3000/poll${data[iˇpoll].id_pk}?id=${data[iˇpoll].id_pk}"><div class="uniform private">${data[iˇpoll].title} Szoba</div>`
+                        document.querySelector(":root").style.setProperty('--theme', '#f9c23c');
+                    }
+                    G.pollsNav.appendChild(newElement);
+                }
+            })
+            .catch(function (reject) {
+                console.log(reject);
+            });
+    }
+    
+    function revealSearchBar() {
+        const input = document.body.querySelector("#searchBar");
+
+        if (G.isSearchBarUp == false) {
+            const input = document.createElement("input");
+
+            input.setAttribute("id", "searchBar");
+            input.classList.add("uniform");
+
+            G.iconsNav.appendChild(input);
+
+            input.addEventListener("input", () => { showPollsSearched(G.isPublicView, input.value); });
+            input.addEventListener("blur", () => { input.remove(); });
+
+            input.focus();
+        }
+    }
+    
+    function getCookie(cookie_name) {
+            // Construct a RegExp object as to include the variable name
+            const re = new RegExp(`(?<=${cookie_name}=)[^;]*`);
+            try {
+                return document.cookie.match(re)[0];	// Will raise TypeError if cookie is not found
+            }
+            catch {
+                return null;
+            }
+        }   
+    </script>
+</body>
+
+</html>
