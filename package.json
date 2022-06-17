@@ -1,0 +1,23 @@
+{
+  "dependencies": {
+    "mysql": "^2.18.1"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "name": "votingapp",
+  "version": "1.0.0",
+  "main": "server.js",
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Dejavu333/votingApp.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Dejavu333/votingApp/issues"
+  },
+  "homepage": "https://github.com/Dejavu333/votingApp#readme",
+  "description": ""
+}

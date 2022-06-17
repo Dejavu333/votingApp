@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="hu">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="http://www.localhost:3000/style.css">
+
+    <title>Szobaválasztás</title>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Válasszon Szavazást:</h2>
+        <br />
+        <nav id="iconsNav">
+            <div class="uniform" id="searchIco" onclick="revealSearchBar()" title="Keresés">🔎</div>
+            <div class="uniform" id="lockIco" onclick="changeLockIco();showPolls(_isPublic)" title="Zárt🔒/Publikus🔓">
+                🔓
+            </div>
+            <a href="http://www.localhost:3000/pollCreation.html">
+                <div class="uniform" title="Szavazás Létrehozása">📌</div>
+            </a>
+        </nav>
+        <main>
+            <nav id="pollsNav">
+
+            </nav>
+        </main>
+    </div>
+
+    <script>
+
+        let _isPublic = true;
+
+        showPolls(_isPublic);
+        console.log(getCookie("UUId"));
+        function showPolls(p_isPublic) {
+            let UUId = getCookie("UUId");
+            const address = "http://www.localhost:3000/getPollsArrayInc";
+            const data = {
+                UUId: UUId,
+            }
+            const options = {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data)
+            }
+
+            fetch(address, options)
+                .then(function (response) {
+                    return response.json();         //GET JSON as object in a promise
+                })
+                .then(function (data) {
+
+                    console.log(data);
+                    const pollsNav = document.querySelector("#pollsNav");
+                    pollsNav.innerHTML = "";
+
+                    for (let iˇpoll = 0; iˇpoll < data.length; iˇpoll++) {
+                        let newElement = document.createElement("div");
+                        if (p_isPublic == true && data[iˇpoll].UUId == "0") {
+                            newElement.innerHTML = `<a href="http://www.localhost:3000/poll${data[iˇpoll].id_pk}?id=${data[iˇpoll].id_pk}"><div class="uniform public">${data[iˇpoll].title} Szoba</div>`
+                        }
+                        else if (p_isPublic == false && data[iˇpoll].UUId != "0") {
+                            newElement.innerHTML = `<a href="http://www.localhost:3000/poll${data[iˇpoll].id_pk}?id=${data[iˇpoll].id_pk}"><div class="uniform private">${data[iˇpoll].title} Szoba</div>`
+                        }
+                        pollsNav.appendChild(newElement);
+                    }
+                })
+                .catch(function (reject) {
+                    console.log(reject);
+                });
+        }
+
+        function changeLockIco() {
+            const lockIco = document.body.querySelector("#lockIco");
+            (_isPublic == true) ? _isPublic = false : _isPublic = true;
+            (_isPublic == true) ? lockIco.innerText = "🔓" : lockIco.innerText = "🔒";
+        }
+
+        let _state = 1
+        document.addEventListener("click", (event) => {
+            if (event.target == document.body.querySelector("#searchIco") && _state < 0) {
+                _state = _state * -1
+            }
+            else {
+                _state = 1
+            }
+        });
+
+        document.addEventListener("mousedown", (event) => {
+            if (event.target == document.body.querySelector("#lockIco")) {
+            }
+            else {
+                try {
+                    document.body.querySelector("#searchBar").remove();
+                } 
+                catch (error) {}
+            };
+        });
+        
+            function revealSearchBar() {
+                if (_state > 0) {
+                    const input = document.createElement("input");
+
+                    input.setAttribute("id", "searchBar");
+                    input.classList.add("uniform");
+
+                    document.body.querySelector("#iconsNav").appendChild(input);
+
+
+                    input.addEventListener("input", searchPoll);
+                    input.addEventListener("blur", function () {
+                        if (_state > 0) {
+                            _state = -1; input.remove();
+                            console.log("punci");
+                        }
+                    });
+
+                    input.focus();
+                }
+            }
+
+            function searchPoll() {
+                console.log("to be implemented");
+            }
+
+            function getCookie(cookie_name) {
+                // Construct a RegExp object as to include the variable name
+                const re = new RegExp(`(?<=${cookie_name}=)[^;]*`);
+                try {
+                    return document.cookie.match(re)[0];	// Will raise TypeError if cookie is not found
+                }
+                catch {
+                    return null;
+                }
+            }
+            console.log(getCookie("UUId"));
+    </script>
+</body>
+
+</html>
